@@ -19,7 +19,9 @@ public class ChatClient implements Runnable {
         // Open a socket on a given host and port. Open input and output streams.
 
         try {
-            // open socket on the host and port, datainput stream to recieve messages from server, dataoutput stream to send messages to server
+            // open socket on the host and port,
+            // datainput stream to receive messages from server,
+            // dataoutput stream to send messages to server
             socket = new Socket(host, portNumber);
             inputLine = new BufferedReader(new InputStreamReader(System.in));
             outputStream = new PrintStream(socket.getOutputStream());
@@ -30,7 +32,7 @@ public class ChatClient implements Runnable {
             System.err.println("I/O error");
         }
 
-        //If all initialized correctly
+        // If all initialized correctly
         if (socket != null && outputStream != null && inputStream != null) {
             try {
                 // thread to read from server
@@ -59,7 +61,7 @@ public class ChatClient implements Runnable {
         try {
             while ((responseLine = inputStream.readLine()) != null) {
                 System.out.println(responseLine);
-                if (responseLine.indexOf("Bye") != -1)
+                if (responseLine.contains("Bye"))
                     break;
             }
             closed = true;
