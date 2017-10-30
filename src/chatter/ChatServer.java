@@ -72,6 +72,7 @@ class clientThread extends Thread {
             outputStream = new PrintStream(clientSocket.getOutputStream());
             outputStream.println("Please enter your name.");
             String name = inputStream.readLine().trim();
+            this.setName(name);
             outputStream.println("Welcome " + name + ".\nEnter /q to leave the chat room.");
             for (int i = 0; i < maxConnections; i++) {
                 if (clientConns[i] != null && clientConns[i] != this) {
@@ -86,17 +87,28 @@ class clientThread extends Thread {
                 if (line.startsWith("/q")) {
                     break;
                 }
-
-                // echos sent message to everyone in the chat
-                for (int i = 0; i < maxConnections; i++) {
-                    if (clientConns[i] != null) {
-                        if (line.startsWith("/nick")){
-                            clientConns[i].outputStream.println(name
-                                    + " has changed name to " + line.split(" ")[1]);
-                            name = line.split(" ")[1];
+                if (line.startsWith("/p")) {
+                    String recipient = line.split(" ")[1];
+                    String message = line.split(" ")[2];
+                    outputStream.println(name + ": " + message);
+                    for (int i = 0; i<maxConnections; i++){
+                        if (clientConns[i] != null && clientConns[i].getName().equals(recipient)){
+                            clientConns[i].outputStream.println(name + ":**P CHAT** " + message);
                         }
-                        else {
-                            clientConns[i].outputStream.println(name + ": " + line);
+                    }
+                }
+                else {
+                    // echos sent message to everyone in the chat
+                    for (int i = 0; i < maxConnections; i++) {
+                        if (clientConns[i] != null) {
+                            if (line.startsWith("/nick")) {
+                                // make sure unique
+                                clientConns[i].outputStream.println(name
+                                        + " has changed name to " + line.split(" ")[1]);
+                                name = line.split(" ")[1];
+                            } else {
+                                clientConns[i].outputStream.println(name + ": " + line);
+                            }
                         }
                     }
                 }
