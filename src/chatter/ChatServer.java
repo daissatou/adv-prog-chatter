@@ -90,7 +90,14 @@ class clientThread extends Thread {
                 // echos sent message to everyone in the chat
                 for (int i = 0; i < maxConnections; i++) {
                     if (clientConns[i] != null) {
-                        clientConns[i].outputStream.println(name + ": " + line);
+                        if (line.startsWith("/nick")){
+                            clientConns[i].outputStream.println(name
+                                    + " has changed name to " + line.split(" ")[1]);
+                            name = line.split(" ")[1];
+                        }
+                        else {
+                            clientConns[i].outputStream.println(name + ": " + line);
+                        }
                     }
                 }
             }
