@@ -2,8 +2,10 @@ package chatter;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.*;
 
-class ChatterLayout extends JFrame {
+class ChatterLayout extends JFrame implements KeyListener {
+
     private JPanel panelChat;
     private JPanel panelList;
 
@@ -49,6 +51,7 @@ class ChatterLayout extends JFrame {
         constraints.gridy = 1;
         constraints.weighty = 0.2;
         panelChat.add(typeArea, constraints);
+        typeArea.addKeyListener(this);
     }
 
     private void setupPanelList() {
@@ -71,4 +74,23 @@ class ChatterLayout extends JFrame {
 
         panelList.add(clientList);
     }
+
+    public void keyPressed(KeyEvent keyEvent)
+    {
+        if(keyEvent.getSource() == typeArea) {
+            if (keyEvent.getKeyCode() == KeyEvent.VK_ENTER)  {
+                String text = typeArea.getText();
+                if (text != "") {
+                    System.out.println("TYPED A THING.... " + text);
+                    // clear text
+                    typeArea.setText("");
+                    // prevent enter from typing in the box
+                    keyEvent.consume();
+                }
+            }
+        }
+    }
+
+    public void keyReleased(KeyEvent keyEvent) { }
+    public void keyTyped(KeyEvent keyEvent) { }
 }
