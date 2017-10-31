@@ -3,6 +3,9 @@ package chatter;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.font.*;
+import java.io.*;
+import java.nio.charset.*;
 
 class ChatterLayout extends JFrame implements KeyListener {
 
@@ -15,13 +18,13 @@ class ChatterLayout extends JFrame implements KeyListener {
 
     public ChatterLayout() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        setTitle("Chatter");
         getContentPane().setLayout(new BorderLayout());
 
         setupPanelChat();
         setupPanelList();
 
         // window settings
+        setTitle("Chatter");
         setSize(new Dimension(640, 480));
         setVisible(true);
     }
@@ -37,11 +40,11 @@ class ChatterLayout extends JFrame implements KeyListener {
         constraints.weightx = 1;
 
         // add chat area
-        chatArea = new TextArea("@peter: \"hello\"", 1, 1, TextArea.SCROLLBARS_VERTICAL_ONLY);
+        chatArea = new TextArea("", 1, 1, TextArea.SCROLLBARS_VERTICAL_ONLY);
         chatArea.setEditable(false);
         constraints.gridx = 0;
         constraints.gridy = 0;
-        constraints.weighty = 0.8;
+        constraints.weighty = 0.9;
         panelChat.add(chatArea, constraints);
 
         // add text area
@@ -49,7 +52,7 @@ class ChatterLayout extends JFrame implements KeyListener {
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridx = 0;
         constraints.gridy = 1;
-        constraints.weighty = 0.2;
+        constraints.weighty = 0.1;
         panelChat.add(typeArea, constraints);
         typeArea.addKeyListener(this);
     }
@@ -75,13 +78,17 @@ class ChatterLayout extends JFrame implements KeyListener {
         panelList.add(clientList);
     }
 
-    public void keyPressed(KeyEvent keyEvent)
-    {
+    public void keyPressed(KeyEvent keyEvent) {
         if(keyEvent.getSource() == typeArea) {
             if (keyEvent.getKeyCode() == KeyEvent.VK_ENTER)  {
                 String text = typeArea.getText();
                 if (text != "") {
-                    System.out.println("TYPED A THING.... " + text);
+                    try {
+                        InputStream inStream = new ByteArrayInputStream(text.getBytes("UTF-8"));
+                        System.setIn(inStream);
+                    } catch (UnsupportedEncodingException e) {
+                        // fuck you
+                    }
                     // clear text
                     typeArea.setText("");
                     // prevent enter from typing in the box
@@ -93,4 +100,8 @@ class ChatterLayout extends JFrame implements KeyListener {
 
     public void keyReleased(KeyEvent keyEvent) { }
     public void keyTyped(KeyEvent keyEvent) { }
+
+    public void putString(String string) {
+        chatArea.setText(chatArea.getText() + string + '\n');
+    }
 }

@@ -13,9 +13,10 @@ public class ChatClient implements Runnable {
     private static BufferedReader inputStream = null;
     private static BufferedReader inputLine = null;
     private static boolean closed = false;
+    private static ChatterLayout layout;
 
     public static void main(String[] args) {
-        new ChatterLayout();
+        layout = new ChatterLayout();
 
         int portNumber = 5155;
         String host = "localhost";
@@ -39,13 +40,13 @@ public class ChatClient implements Runnable {
         // If all initialized correctly
         if (socket != null && outputStream != null && inputStream != null) {
             try {
-                // thread to read from server
+                // Thread to read from server
                 new Thread(new ChatClient()).start();
                 while (!closed) {
                     outputStream.println(inputLine.readLine().trim());
                 }
 
-                // Close that were opened
+                // Close streams that were opened
                 outputStream.close();
                 inputStream.close();
                 socket.close();
@@ -54,7 +55,6 @@ public class ChatClient implements Runnable {
             }
         }
     }
-
 
     public void run() {
         /*
@@ -65,6 +65,8 @@ public class ChatClient implements Runnable {
         try {
             while ((responseLine = inputStream.readLine()) != null) {
                 System.out.println(responseLine);
+                layout.putString(responseLine);
+
                 if (responseLine.contains("Bye"))
                     break;
             }
