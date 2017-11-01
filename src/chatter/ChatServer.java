@@ -89,6 +89,10 @@ class clientThread extends Thread {
             while (true) {
                 String line = inputStream.readLine();
                 // to quit the chat
+                if (line == null) {
+                    continue;
+                }
+
                 if (line.startsWith("/q")) {
                     break;
                 }

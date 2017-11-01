@@ -96,6 +96,10 @@ class ChatterLayout extends JFrame implements KeyListener {
                 // Get first element of the List
                 byte[] bytes = inputBuffer.get(0);
                 // Get the byte corresponding to the index and post increment the current index
+                if (bytes == null) {
+                    // TODO: not sure why this should be happening...
+                    return -1;
+                }
                 byte result = bytes[index++];
                 if (index >= bytes.length) {
                     // It was the last index of the byte array so we remove it from the list
@@ -116,13 +120,14 @@ class ChatterLayout extends JFrame implements KeyListener {
                     System.out.println("text typed: " + text);
                     // System.setIn(inStream);
                     // TODO: somehow put the output into a buffer/stream
-                    byte[] data = {};
                     try {
-                        data = text.getBytes("UTF-8");
+                        byte[] data = text.getBytes("UTF-8");
+                        if (data != null) {
+                            inputBuffer.add(data);
+                        }
                     } catch (UnsupportedEncodingException e) {
                         System.out.println("UnsupportedEncodingException: " + e);
                     }
-                    inputBuffer.add(data);
                     // clear text
                     typeArea.setText("");
                     // prevent enter from typing in the box
