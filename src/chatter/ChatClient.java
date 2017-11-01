@@ -28,7 +28,6 @@ public class ChatClient implements Runnable {
             // datainput stream to receive messages from server,
             // dataoutput stream to send messages to server
             socket = new Socket(host, portNumber);
-            // inputLine = new BufferedReader(new InputStreamReader(System.in));
             inputLine = new BufferedReader(new InputStreamReader(layout.getInputStream()));
             outputStream = new PrintStream(socket.getOutputStream());
             inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -68,11 +67,10 @@ public class ChatClient implements Runnable {
         String responseLine;
         try {
             while ((responseLine = inputStream.readLine()) != null) {
-                System.out.println(responseLine);
                 layout.putString(responseLine);
-
-                if (responseLine.contains("Bye"))
+                if (responseLine.contains("Bye")) {
                     break;
+                }
             }
             closed = true;
         } catch (IOException e) {

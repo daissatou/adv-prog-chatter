@@ -87,23 +87,27 @@ class ChatterLayout extends JFrame implements KeyListener {
     }
 
     private void setupInputStream() {
+        // TODO: this code was partially taken from a tutorial, need to disclose that
         inputStream = new InputStream() {
             @Override
             public int read() throws IOException {
                 if (inputBuffer.isEmpty()) {
                     return -1;
                 }
-                // Get first element of the List
+                // get the next byte[] from the inputBuffer
                 byte[] bytes = inputBuffer.get(0);
-                // Get the byte corresponding to the index and post increment the current index
                 if (bytes == null) {
                     // TODO: not sure why this should be happening...
+                    // maybe should be just doing this: ?
+                    // inputBuffer.remove(0);
+                    // index = 0;
                     return -1;
                 }
+                // read the next byte from bytes[] and increment our index
                 byte result = bytes[index++];
                 if (index >= bytes.length) {
-                    // It was the last index of the byte array so we remove it from the list
-                    // and reset the current index
+                    // we've finished reading through the byte array
+                    // so we remove it from inputBuffer and start back at index 0
                     inputBuffer.remove(0);
                     index = 0;
                 }
@@ -117,9 +121,7 @@ class ChatterLayout extends JFrame implements KeyListener {
             if (keyEvent.getKeyCode() == KeyEvent.VK_ENTER)  {
                 String text = typeArea.getText();
                 if (text != "") {
-                    System.out.println("text typed: " + text);
-                    // System.setIn(inStream);
-                    // TODO: somehow put the output into a buffer/stream
+                    // add typed text to inputBuffer, so it can be read by client
                     try {
                         byte[] data = text.getBytes("UTF-8");
                         if (data != null) {
@@ -146,5 +148,6 @@ class ChatterLayout extends JFrame implements KeyListener {
 
     public void putString(String string) {
         chatArea.setText(chatArea.getText() + string + '\n');
+        chatArea.setCaretPosition(chatArea.getText().length());
     }
 }
