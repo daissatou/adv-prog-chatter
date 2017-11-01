@@ -6,6 +6,8 @@ import java.awt.event.*;
 import java.awt.font.*;
 import java.io.*;
 import java.nio.charset.*;
+import java.util.ArrayList;
+import java.util.List;
 
 class ChatterLayout extends JFrame implements KeyListener {
 
@@ -16,12 +18,18 @@ class ChatterLayout extends JFrame implements KeyListener {
     private TextArea typeArea;
     private JList clientList;
 
+    // Current index in the last byte array read
+    private int index; // TODO: do i need to edit this?
+    private List<byte[]> inputBuffer = new ArrayList<byte[]>();
+    private InputStream inputStream;
+
     public ChatterLayout() {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         getContentPane().setLayout(new BorderLayout());
 
         setupPanelChat();
         setupPanelList();
+        setupInputStream();
 
         // window settings
         setTitle("Chatter");
@@ -78,17 +86,43 @@ class ChatterLayout extends JFrame implements KeyListener {
         panelList.add(clientList);
     }
 
+    private void setupInputStream() {
+        inputStream = new InputStream() {
+            @Override
+            public int read() throws IOException {
+                if (inputBuffer.isEmpty()) {
+                    return -1;
+                }
+                // Get first element of the List
+                byte[] bytes = inputBuffer.get(0);
+                // Get the byte corresponding to the index and post increment the current index
+                byte result = bytes[index++];
+                if (index >= bytes.length) {
+                    // It was the last index of the byte array so we remove it from the list
+                    // and reset the current index
+                    inputBuffer.remove(0);
+                    index = 0;
+                }
+                return result;
+            }
+        };
+    }
+
     public void keyPressed(KeyEvent keyEvent) {
         if(keyEvent.getSource() == typeArea) {
             if (keyEvent.getKeyCode() == KeyEvent.VK_ENTER)  {
                 String text = typeArea.getText();
                 if (text != "") {
+                    System.out.println("text typed: " + text);
+                    // System.setIn(inStream);
+                    // TODO: somehow put the output into a buffer/stream
+                    byte[] data = {};
                     try {
-                        InputStream inStream = new ByteArrayInputStream(text.getBytes("UTF-8"));
-                        System.setIn(inStream);
+                        data = text.getBytes("UTF-8");
                     } catch (UnsupportedEncodingException e) {
-                        // fuck you
+                        System.out.println("UnsupportedEncodingException: " + e);
                     }
+                    inputBuffer.add(data);
                     // clear text
                     typeArea.setText("");
                     // prevent enter from typing in the box
@@ -100,6 +134,10 @@ class ChatterLayout extends JFrame implements KeyListener {
 
     public void keyReleased(KeyEvent keyEvent) { }
     public void keyTyped(KeyEvent keyEvent) { }
+
+    public InputStream getInputStream() {
+        return inputStream;
+    }
 
     public void putString(String string) {
         chatArea.setText(chatArea.getText() + string + '\n');

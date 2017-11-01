@@ -28,13 +28,14 @@ public class ChatClient implements Runnable {
             // datainput stream to receive messages from server,
             // dataoutput stream to send messages to server
             socket = new Socket(host, portNumber);
-            inputLine = new BufferedReader(new InputStreamReader(System.in));
+            // inputLine = new BufferedReader(new InputStreamReader(System.in));
+            inputLine = new BufferedReader(new InputStreamReader(layout.getInputStream()));
             outputStream = new PrintStream(socket.getOutputStream());
             inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (UnknownHostException e) {
             System.err.println("Unknown host: " + host);
         } catch (IOException e) {
-            System.err.println("I/O error");
+            System.err.println("I/O error: " + e);
         }
 
         // If all initialized correctly
@@ -43,7 +44,10 @@ public class ChatClient implements Runnable {
                 // Thread to read from server
                 new Thread(new ChatClient()).start();
                 while (!closed) {
-                    outputStream.println(inputLine.readLine().trim());
+                    String line = inputLine.readLine();
+                    if (line != null) {
+                        outputStream.println(line.trim());
+                    }
                 }
 
                 // Close streams that were opened
