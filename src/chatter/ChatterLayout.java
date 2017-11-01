@@ -9,13 +9,14 @@ import java.nio.charset.*;
 import java.util.ArrayList;
 import java.util.List;
 
-class ChatterLayout extends JFrame implements KeyListener {
+class ChatterLayout extends JFrame implements KeyListener, ActionListener {
 
     private JPanel panelChat;
     private JPanel panelList;
 
     private TextArea chatArea;
     private TextArea typeArea;
+    private JButton sendButton;
     private JList clientList;
 
     // Current index in the last byte array read
@@ -52,6 +53,7 @@ class ChatterLayout extends JFrame implements KeyListener {
         chatArea.setEditable(false);
         constraints.gridx = 0;
         constraints.gridy = 0;
+        constraints.gridwidth = 2;
         constraints.weighty = 0.9;
         panelChat.add(chatArea, constraints);
 
@@ -60,9 +62,22 @@ class ChatterLayout extends JFrame implements KeyListener {
         constraints.fill = GridBagConstraints.BOTH;
         constraints.gridx = 0;
         constraints.gridy = 1;
+        constraints.gridwidth = 1;
+        constraints.weightx = 0.9;
         constraints.weighty = 0.1;
         panelChat.add(typeArea, constraints);
         typeArea.addKeyListener(this);
+
+        // add send button
+        sendButton = new JButton("Send");
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.gridx = 1;
+        constraints.gridy = 1;
+        constraints.gridwidth = 1;
+        constraints.weightx = 0.1;
+        constraints.weighty = 0.1;
+        panelChat.add(sendButton, constraints);
+        sendButton.addActionListener(this);
     }
 
     private void setupPanelList() {
@@ -116,31 +131,43 @@ class ChatterLayout extends JFrame implements KeyListener {
         };
     }
 
+    // KeyListener methods
+
     public void keyPressed(KeyEvent keyEvent) {
         if(keyEvent.getSource() == typeArea) {
             if (keyEvent.getKeyCode() == KeyEvent.VK_ENTER)  {
-                String text = typeArea.getText();
-                if (text != "") {
-                    // add typed text to inputBuffer, so it can be read by client
-                    try {
-                        byte[] data = text.getBytes("UTF-8");
-                        if (data != null) {
-                            inputBuffer.add(data);
-                        }
-                    } catch (UnsupportedEncodingException e) {
-                        System.out.println("UnsupportedEncodingException: " + e);
-                    }
-                    // clear text
-                    typeArea.setText("");
-                    // prevent enter from typing in the box
-                    keyEvent.consume();
-                }
+                send(typeArea.getText());
+                // prevent enter from typing in the box
+                keyEvent.consume();
             }
         }
     }
 
     public void keyReleased(KeyEvent keyEvent) { }
     public void keyTyped(KeyEvent keyEvent) { }
+
+    // ActionListener methods
+    public void actionPerformed(ActionEvent actionEvent) {
+        if (actionEvent.getSource() == sendButton) {
+            send(typeArea.getText());
+        }
+    }
+
+    private void send(String text) {
+        if (!text.isEmpty()) {
+            // add typed text to inputBuffer, so it can be read by client
+            try {
+                byte[] data = text.getBytes("UTF-8");
+                if (data != null) {
+                    inputBuffer.add(data);
+                }
+            } catch (UnsupportedEncodingException e) {
+                System.out.println("UnsupportedEncodingException: " + e);
+            }
+            // clear text
+            typeArea.setText("");
+        }
+    }
 
     public InputStream getInputStream() {
         return inputStream;

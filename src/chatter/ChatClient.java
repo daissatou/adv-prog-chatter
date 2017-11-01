@@ -54,7 +54,7 @@ public class ChatClient implements Runnable {
                 inputStream.close();
                 socket.close();
             } catch (IOException e) {
-                System.err.println("IOException:  " + e);
+                System.err.println("IOException: " + e);
             }
         }
     }
