@@ -1,5 +1,8 @@
 package chatter;
 
+import javax.swing.*;
+import javax.swing.border.Border;
+import java.awt.*;
 import java.net.*;
 import java.io.*;
 
@@ -10,8 +13,10 @@ public class ChatClient implements Runnable {
     private static BufferedReader inputStream = null;
     private static BufferedReader inputLine = null;
     private static boolean closed = false;
+    private static ChatterLayout layout;
 
     public static void main(String[] args) {
+        layout = new ChatterLayout();
 
         int portNumber = 5155;
         String host = "localhost";
@@ -23,34 +28,36 @@ public class ChatClient implements Runnable {
             // datainput stream to receive messages from server,
             // dataoutput stream to send messages to server
             socket = new Socket(host, portNumber);
-            inputLine = new BufferedReader(new InputStreamReader(System.in));
+            inputLine = new BufferedReader(new InputStreamReader(layout.getInputStream()));
             outputStream = new PrintStream(socket.getOutputStream());
             inputStream = new BufferedReader(new InputStreamReader(socket.getInputStream()));
         } catch (UnknownHostException e) {
             System.err.println("Unknown host: " + host);
         } catch (IOException e) {
-            System.err.println("I/O error");
+            System.err.println("I/O error: " + e);
         }
 
         // If all initialized correctly
         if (socket != null && outputStream != null && inputStream != null) {
             try {
-                // thread to read from server
+                // Thread to read from server
                 new Thread(new ChatClient()).start();
                 while (!closed) {
-                outputStream.println(inputLine.readLine().trim());
+                    String line = inputLine.readLine();
+                    if (line != null) {
+                        outputStream.println(line.trim());
+                    }
                 }
 
-                // Close that were opened
+                // Close streams that were opened
                 outputStream.close();
                 inputStream.close();
                 socket.close();
             } catch (IOException e) {
-                System.err.println("IOException:  " + e);
+                System.err.println("IOException: " + e);
             }
         }
     }
-
 
     public void run() {
         /*
@@ -60,9 +67,10 @@ public class ChatClient implements Runnable {
         String responseLine;
         try {
             while ((responseLine = inputStream.readLine()) != null) {
-                System.out.println(responseLine);
-                if (responseLine.contains("Bye"))
+                layout.putString(responseLine);
+                if (responseLine.contains("Bye")) {
                     break;
+                }
             }
             closed = true;
         } catch (IOException e) {

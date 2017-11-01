@@ -1,3 +1,12 @@
+//
+//  Created by:
+//      ad1229  Aissatou Diallo
+//      pj202   Peter Johnston
+//      sam439  Sally Matson
+//
+//  Disclosures:
+//
+
 package chatter;
 
 import sun.font.TrueTypeFont;
@@ -9,27 +18,25 @@ import java.io.*;
 public class ChatServer {
 
     private static ServerSocket serverSocket = null;
-    private static Socket conn = null;
     // maximum number of connected users
     private static final int maxConnections = 10;
     private static final clientThread[] clientConns = new clientThread[maxConnections];
 
     public static void main(String args[]) {
 
-        //open socket on server
+        // open socket on server
         int portNumber = 5155;
         try {
             serverSocket = new ServerSocket(portNumber);
         } catch (IOException e) {
-            System.out.println(e);
+            System.err.println("IOException:  " + e);
         }
 
         // Create a connection and new client thread for each new client
         while (true) {
             try {
-
                 System.out.println("Listening for connections...");
-                conn = serverSocket.accept();
+                Socket conn = serverSocket.accept();
                 int i = 0;
                 for (i = 0; i < maxConnections; i++) {
                     if (clientConns[i] == null) {
@@ -44,7 +51,7 @@ public class ChatServer {
                     conn.close();
                 }
             } catch (IOException e) {
-                System.out.println(e);
+                System.err.println("IOException:  " + e);
             }
         }
     }
@@ -102,7 +109,10 @@ class clientThread extends Thread {
             // INSIDE CHAT :
             while (true) {
                 String line = inputStream.readLine();
-                // QUIT CHAT :
+                if (line == null) {
+                    continue;
+                }
+                // QUIT CHAT : 
                 if (line.startsWith("/q")) {
                     break;
                 }
@@ -165,7 +175,7 @@ class clientThread extends Thread {
             outputStream.close();
             clientSocket.close();
         } catch (IOException e) {
-            // TODO: catch the exception
+            System.err.println("IOException:  " + e);
         }
     }
 }
