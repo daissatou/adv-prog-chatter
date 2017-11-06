@@ -64,12 +64,14 @@ class clientThread extends Thread {
     private Socket clientSocket = null;
     private final clientThread[] clientConns;
     private int maxConnections;
+    private boolean hasName = false;
 
     public clientThread(Socket clientSocket, clientThread[] clientConns) {
         this.clientSocket = clientSocket;
         this.clientConns = clientConns;
         maxConnections = clientConns.length;
     }
+
     private boolean nameIsUnique(String name){
         for (int i = 0; i < maxConnections; i++){
             if (clientConns[i] != null && clientConns[i].getName().equals(name)){
@@ -87,10 +89,18 @@ class clientThread extends Thread {
             // open for one client, adds them to the list and informs everyone
             inputStream = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             outputStream = new PrintStream(clientSocket.getOutputStream());
+            for (int i = 0; i<maxConnections; i++){
+                if (clientConns[i] != null && clientConns[i] != this){
+                    if (clientConns[i].hasName){
+                        outputStream.println("C=add=" + clientConns[i].getName());
+                    }
+                }
+            }
             outputStream.println("Please enter your name.");
-            boolean needName = true;
-            while (needName) {
+            while (!hasName) {
                 String name = inputStream.readLine().trim();
+                // remove the M= that automatically gets added
+                name = name.substring(2);
                 if (nameIsUnique(name)) {
                     this.setName(name);
                     outputStream.println("Welcome " + this.getName() + ".\nEnter /q to leave the chat room.");
@@ -98,9 +108,10 @@ class clientThread extends Thread {
                         if (clientConns[i] != null && clientConns[i] != this) {
                             clientConns[i].outputStream.println(name
                                     + " has entered.");
+                            clientConns[i].outputStream.println("C=add=" + name);
                         }
                     }
-                    needName = false;
+                    hasName = true;
                 } else {
                     outputStream.println("This username has been taken, please select a new one.");
                 }
@@ -112,55 +123,68 @@ class clientThread extends Thread {
                 if (line == null) {
                     continue;
                 }
-                // QUIT CHAT : 
-                if (line.startsWith("/q")) {
-                    break;
+
+                // user has performed a command:
+                if (line.startsWith("C=")){
+                    if (line.startsWith("/q", 2)){
+                        // QUIT THE PROGRAM
+                        break;
+                    }
+                    else if (line.startsWith("/nick", 2)){
+                        // CHANGE NICKNAME
+                        String newName = line.substring(8);
+                        if (nameIsUnique(newName)) {
+                            for (int i = 0; i < maxConnections; i++) {
+                                if (clientConns[i] != null) {
+                                    clientConns[i].outputStream.println("M="+ this.getName()
+                                            + " has changed name to " + newName);
+                                    if (clientConns[i] != this){
+                                        clientConns[i].outputStream.println("C=add=" + newName);
+                                        clientConns[i].outputStream.println("C=remove=" + this.getName());
+                                    }
+                                }
+                            }
+                            this.setName(newName);
+                        }
+                        else {
+                            outputStream.println("M=This username has already been taken.");
+                        }
+                    }
                 }
-                // PRIVATE CHAT :
-                else if (line.startsWith("/p")) {
-                    String recipient = line.split(" ")[1];
-                    // TODO : get whole message
-                    String message = line.split(" ")[2];
+
+                // user has started a private message:
+                else if (line.startsWith("P=")){
+                    line = line.substring(2);
+                    // TODO : make it so that user can have = in username ???
+                    String recipient = line.split("=")[0];
+                    String message = line.split("=")[1];
                     outputStream.println(this.getName() + ": " + message);
                     for (int i = 0; i<maxConnections; i++){
                         if (clientConns[i] != null && clientConns[i].getName().equals(recipient)){
-                            clientConns[i].outputStream.println(this.getName() + ":**P CHAT** " + message);
+                            clientConns[i].outputStream.println("M=" + "Private msg from " + this.getName() + ": " + message);
                         }
                     }
                 }
-                // CHANGE NICKNAME :
-                else if (line.startsWith("/nick")){
-                    String newName = line.split(" ")[1];
-                    if (nameIsUnique(newName)) {
-                        for (int i = 0; i < maxConnections; i++) {
-                            if (clientConns[i] != null) {
-                                clientConns[i].outputStream.println(this.getName()
-                                        + " has changed name to " + line.split(" ")[1]);
-                            }
-                        }
-                        this.setName(newName);
-                    }
-                    else {
-                        outputStream.println("This username has already been taken.");
-                    }
-                }
-                // SEND MESSAGE TO EVERYONE
-                else {
+
+                // user has send a message to everyone:
+                else if (line.startsWith("M=")){
                     for (int i = 0; i < maxConnections; i++) {
                         if (clientConns[i] != null) {
-                            clientConns[i].outputStream.println(this.getName() + ": " + line);
+                            clientConns[i].outputStream.println("M=" + this.getName() + ": " + line.substring(2));
                         }
                     }
                 }
             }
 
-            // user exists the program
+            // user exits the program
             for (int i = 0; i < maxConnections; i++) {
                 if (clientConns[i] != null && clientConns[i] != this) {
                     clientConns[i].outputStream.println(this.getName()+ " has left.");
                 }
             }
             outputStream.println("Bye " + this.getName());
+            outputStream.println("C=remove=" + this.getName());
+            outputStream.println("C=quit");
 
 
             // free the current thread
