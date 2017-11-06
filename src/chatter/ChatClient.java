@@ -16,10 +16,18 @@ public class ChatClient implements Runnable {
     private static ChatterLayout layout;
 
     public static void main(String[] args) {
-        layout = new ChatterLayout();
-
-        int portNumber = 5155;
-        String host = "localhost";
+    		
+    		if(args.length < 2) {
+    			System.out.println("Please pass host name and port number as command line arguments");
+    			System.exit(0);
+    		}
+    		
+    		String host = args[0];
+    		int portNumber = Integer.parseInt(args[1]);
+    		
+        
+        //int portNumber = 5155;
+        //String host = "localhost";
 
         // Open a socket on a given host and port. Open input and output streams.
 
@@ -36,10 +44,13 @@ public class ChatClient implements Runnable {
         } catch (IOException e) {
             System.err.println("I/O error: " + e);
         }
+       
 
         // If all initialized correctly
         if (socket != null && outputStream != null && inputStream != null) {
             try {
+                layout = new ChatterLayout();
+
                 // Thread to read from server
                 new Thread(new ChatClient()).start();
                 while (!closed) {

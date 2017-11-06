@@ -19,13 +19,20 @@ public class ChatServer {
 
     private static ServerSocket serverSocket = null;
     // maximum number of connected users
-    private static final int maxConnections = 10;
+    private static final int maxConnections = 20;
     private static final clientThread[] clientConns = new clientThread[maxConnections];
 
     public static void main(String args[]) {
 
+    		if(args.length < 1) {
+			System.out.println("Please pass port number as command line argument");
+			System.exit(0);
+		}
+		
+		int portNumber = Integer.parseInt(args[0]);
+		
         // open socket on server
-        int portNumber = 5155;
+        //int portNumber = 5155;
         try {
             serverSocket = new ServerSocket(portNumber);
         } catch (IOException e) {
@@ -58,7 +65,7 @@ public class ChatServer {
 }
 
 class clientThread extends Thread {
-
+	//TODO: cite tutorial referenced 
     private BufferedReader inputStream = null;
     private PrintStream outputStream = null;
     private Socket clientSocket = null;
@@ -187,7 +194,7 @@ class clientThread extends Thread {
             outputStream.println("C=quit");
 
 
-            // free the current thread
+            //free the current thread
             for (int i = 0; i < maxConnections; i++) {
                 if (clientConns[i] == this) {
                     clientConns[i] = null;
