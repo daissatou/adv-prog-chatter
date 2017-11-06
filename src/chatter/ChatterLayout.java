@@ -11,13 +11,15 @@ import java.util.List;
 
 class ChatterLayout extends JFrame implements KeyListener, ActionListener {
 
+    public DefaultListModel clients = new DefaultListModel();
+
     private JPanel panelChat;
     private JPanel panelList;
 
     private TextArea chatArea;
     private TextArea typeArea;
     private JButton sendButton;
-    private JList clientList;
+    public JList clientList;
 
     // Current index in the last byte array read
     private int index; // TODO: do i need to edit this?
@@ -85,19 +87,9 @@ class ChatterLayout extends JFrame implements KeyListener, ActionListener {
         add(panelList, BorderLayout.LINE_END);
         panelList.setLayout(new BoxLayout(panelList, BoxLayout.Y_AXIS));
         panelList.setBorder(BorderFactory.createEmptyBorder(6, 4, 4, 6)); // TODO: figure out how to add insets
-
-        // add components
-        String[] clients = {
-            "Sally                  ",
-            "Peter",
-            "Aicha",
-            "client 4",
-            "client 5",
-            "client 6",
-        };
+        clients.addElement("Everyone");
         clientList = new JList(clients);
         clientList.setPreferredSize(new Dimension(100, 0));
-
         panelList.add(clientList);
     }
 
@@ -155,6 +147,12 @@ class ChatterLayout extends JFrame implements KeyListener, ActionListener {
 
     private void send(String text) {
         if (!text.isEmpty()) {
+            // see if a person is selected
+            // send P=contents of selected (name)=message
+            // or send M=message
+            // /nick sally
+            // N=sally
+
             // add typed text to inputBuffer, so it can be read by client
             try {
                 byte[] data = text.getBytes("UTF-8");
