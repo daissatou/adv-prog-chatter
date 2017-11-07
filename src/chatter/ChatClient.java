@@ -60,7 +60,10 @@ public class ChatClient implements Runnable {
                     // sends to the server
                     String message = "";
                     if (line != null) {
-                        if (line.startsWith("/nick") || line.startsWith("/q")){
+                        if (!hasName) {
+                            // setting name! (which server requires a M= prepended)
+                            message = "M=" + line.trim();
+                        } else if (line.startsWith("/nick") || line.startsWith("/q")){
                             // sending a command
                             message = "C=" + line.trim();
                         } else if (layout.clientList.isSelectionEmpty()) {
@@ -69,13 +72,10 @@ public class ChatClient implements Runnable {
                         } else if (layout.clientList.getSelectedIndex() == 0) {
                             // "Everyone" selection -> send to everyone
                             message = "M=" + line.trim();
-                        } else if (hasName) {
+                        } else {
                             // specific selection -> send to that recipient
                             Object recipient = layout.clientList.getSelectedValue();
                             message = "P=" + recipient + "=" + line.trim();
-                        } else {
-                            // setting name! (which server requires a M= prepended)
-                            message = "M=" + line.trim();
                         }
                         outputStream.println(message);
                     }
