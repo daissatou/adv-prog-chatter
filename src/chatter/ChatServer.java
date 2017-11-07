@@ -116,6 +116,9 @@ class clientThread extends Thread {
                             clientConns[i].outputStream.println(name
                                     + " has entered.");
                             clientConns[i].outputStream.println("C=add=" + name);
+                        } else if (clientConns[i] == this) {
+                            // notify that name has been set
+                            clientConns[i].outputStream.println("C=join");
                         }
                     }
                     hasName = true;
@@ -165,7 +168,7 @@ class clientThread extends Thread {
                     // TODO : make it so that user can have = in username ???
                     String recipient = line.split("=")[0];
                     String message = line.split("=")[1];
-                    outputStream.println(this.getName() + ": " + message);
+                    outputStream.println("Private msg to " + recipient + ": " + message);
                     for (int i = 0; i<maxConnections; i++){
                         if (clientConns[i] != null && clientConns[i].getName().equals(recipient)){
                             clientConns[i].outputStream.println("M=" + "Private msg from " + this.getName() + ": " + message);
