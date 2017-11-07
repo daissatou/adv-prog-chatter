@@ -14,6 +14,7 @@ public class ChatClient implements Runnable {
     private static BufferedReader inputLine = null;
     private static boolean closed = false;
     private static ChatterLayout layout;
+    private static boolean hasName = false;
 
     public static void main(String[] args) {
 
@@ -59,14 +60,20 @@ public class ChatClient implements Runnable {
                     // sends to the server
                     String message = "";
                     if (line != null) {
-                        if (line.startsWith("/nick") || line.startsWith("/q")){
+                        if (!hasName) {
+                            // setting name! (which server requires a M= prepended)
+                            message = "M=" + line.trim();
+                        } else if (line.startsWith("/nick") || line.startsWith("/q")){
+                            // sending a command
                             message = "C=" + line.trim();
                         } else if (layout.clientList.isSelectionEmpty()) {
                             // no selection -> send to everyone
                             message = "M=" + line.trim();
-                        } else if (layout.clientList.getSelectedIndex() == 0){
+                        } else if (layout.clientList.getSelectedIndex() == 0) {
+                            // "Everyone" selection -> send to everyone
                             message = "M=" + line.trim();
                         } else {
+                            // specific selection -> send to that recipient
                             Object recipient = layout.clientList.getSelectedValue();
                             message = "P=" + recipient + "=" + line.trim();
                         }
@@ -98,9 +105,11 @@ public class ChatClient implements Runnable {
                 } else if (responseLine.startsWith("C=add=")){
                     String newName = responseLine.substring(6);
                     layout.clients.addElement(newName);
-                } else if (responseLine.startsWith("C=remove=")){
+                } else if (responseLine.startsWith("C=remove=")) {
                     String oldName = responseLine.substring(9);
                     layout.clients.removeElement(oldName);
+                } else if (responseLine.startsWith("C=join")) {
+                    hasName = true;
                 } else if (responseLine.startsWith("M=")){
                     // sends to the layout, get rid of M=
                     layout.putString(responseLine.substring(2));

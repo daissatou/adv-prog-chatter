@@ -108,7 +108,11 @@ class clientThread extends Thread {
                 String name = inputStream.readLine().trim();
                 // remove the M= that automatically gets added
                 name = name.substring(2);
-                if (nameIsUnique(name)) {
+                if (!nameIsUnique(name)) {
+                    outputStream.println("This username has been taken, please select a new one.");
+                } else if (name.contains("=")) {
+                    outputStream.println("Please choose a username without a = character.");
+                } else {
                     this.setName(name);
                     outputStream.println("Welcome " + this.getName() + ".\nEnter /q to leave the chat room.");
                     for (int i = 0; i < maxConnections; i++) {
@@ -116,11 +120,12 @@ class clientThread extends Thread {
                             clientConns[i].outputStream.println(name
                                     + " has entered.");
                             clientConns[i].outputStream.println("C=add=" + name);
+                        } else if (clientConns[i] == this) {
+                            // notify that name has been set
+                            clientConns[i].outputStream.println("C=join");
                         }
                     }
                     hasName = true;
-                } else {
-                    outputStream.println("This username has been taken, please select a new one.");
                 }
             }
 
@@ -140,7 +145,11 @@ class clientThread extends Thread {
                     else if (line.startsWith("/nick", 2)){
                         // CHANGE NICKNAME
                         String newName = line.substring(8);
-                        if (nameIsUnique(newName)) {
+                        if (!nameIsUnique(newName)) {
+                            outputStream.println("M=This username has already been taken.");
+                        } else if (newName.contains("=")) {
+                            outputStream.println("M=Please choose a username without a = character.");
+                        } else {
                             for (int i = 0; i < maxConnections; i++) {
                                 if (clientConns[i] != null) {
                                     clientConns[i].outputStream.println("M="+ this.getName()
@@ -153,19 +162,15 @@ class clientThread extends Thread {
                             }
                             this.setName(newName);
                         }
-                        else {
-                            outputStream.println("M=This username has already been taken.");
-                        }
                     }
                 }
 
                 // user has started a private message:
                 else if (line.startsWith("P=")){
                     line = line.substring(2);
-                    // TODO : make it so that user can have = in username ???
                     String recipient = line.split("=")[0];
                     String message = line.split("=")[1];
-                    outputStream.println(this.getName() + ": " + message);
+                    outputStream.println("Private msg to " + recipient + ": " + message);
                     for (int i = 0; i<maxConnections; i++){
                         if (clientConns[i] != null && clientConns[i].getName().equals(recipient)){
                             clientConns[i].outputStream.println("M=" + "Private msg from " + this.getName() + ": " + message);
