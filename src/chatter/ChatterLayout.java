@@ -11,7 +11,7 @@ import java.util.List;
 
 class ChatterLayout extends JFrame implements KeyListener, ActionListener {
 
-    public DefaultListModel clients = new DefaultListModel();
+    public DefaultListModel<String> clients = new DefaultListModel<String>();
 
     private JPanel panelChat;
     private JPanel panelList;
@@ -19,7 +19,7 @@ class ChatterLayout extends JFrame implements KeyListener, ActionListener {
     private TextArea chatArea;
     private TextArea typeArea;
     private JButton sendButton;
-    public JList clientList;
+    public JList<String> clientList;
 
     // Current index in the last byte array read
     private int index; // TODO: do i need to edit this?
@@ -88,7 +88,7 @@ class ChatterLayout extends JFrame implements KeyListener, ActionListener {
         panelList.setLayout(new BoxLayout(panelList, BoxLayout.Y_AXIS));
         panelList.setBorder(BorderFactory.createEmptyBorder(6, 4, 4, 6)); // TODO: figure out how to add insets
         clients.addElement("Everyone");
-        clientList = new JList(clients);
+        clientList = new JList<>(clients);
         clientList.setPreferredSize(new Dimension(100, 0));
         panelList.add(clientList);
     }
