@@ -18,13 +18,16 @@ public class ChatClient implements Runnable {
 
     public static void main(String[] args) {
 
-        layout = new ChatterLayout();
     		
         if(args.length < 2) {
             System.out.println("Please pass host name and port number as command line arguments");
             System.exit(0);
         }
 
+        //only start
+        layout = new ChatterLayout();
+
+        
         String host = args[0];
         int portNumber = Integer.parseInt(args[1]);
     		

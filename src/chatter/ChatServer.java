@@ -9,7 +9,7 @@
 
 package chatter;
 
-import sun.font.TrueTypeFont;
+//import sun.font.TrueTypeFont;
 
 import java.net.*;
 import java.io.*;
@@ -65,7 +65,6 @@ public class ChatServer {
 }
 
 class clientThread extends Thread {
-	//TODO: cite tutorial referenced 
     private BufferedReader inputStream = null;
     private PrintStream outputStream = null;
     private Socket clientSocket = null;
@@ -114,7 +113,7 @@ class clientThread extends Thread {
                     outputStream.println("Please choose a username without a = character.");
                 } else {
                     this.setName(name);
-                    outputStream.println("Welcome " + this.getName() + ".\nEnter /q to leave the chat room.");
+                    outputStream.println("Welcome " + this.getName() + ".\nEnter /q to leave the chat room.\nEnter /nick before the name to change your nickname");
                     for (int i = 0; i < maxConnections; i++) {
                         if (clientConns[i] != null && clientConns[i] != this) {
                             clientConns[i].outputStream.println(name
